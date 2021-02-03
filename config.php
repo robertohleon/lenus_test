@@ -1,4 +1,3 @@
-<!-- Configuration of database variables and conections. -->
 <?php
     $db_user = "root";
     $db_password = "";

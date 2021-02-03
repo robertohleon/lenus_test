@@ -1,5 +1,5 @@
 <?php
-  require_once('config.php')
+require_once('config.php')
 ?>
 
 <!DOCTYPE html>
@@ -15,35 +15,10 @@
 
 <body>
 
-    <!-- The logic behind the HTML, simple php code for validate info, sending and save it -->
+
     <div>
         <?php
-        // Check if the information contained in my "send_info" POST is not null
-        if (isset($_POST['send_info'])) {
-            // Get the form variables
-            $firstname = $_POST['firstname'];
-            $lastname = $_POST['lastname'];
-            $phonenumber = $_POST['phonenumber'];
-            $email = $_POST['email'];
-            $password = $_POST['password'];
-            $confirm_password = $_POST['confirm_password'];
-
-            // Before we save the info, we must validate if the password and the confirm_password variables match, this is just to be sure of our new password so we dont type anything unwanted
-            if($confirm_password != $password){
-                // If doesnt match, it will show an error
-                echo "Confirm Password doesnt match";
-            }else{
-                // If passwords match, it will set the variables to consume the service and save the data. 
-                $sql = "INSERT INTO users (firstname, lastname, phonenumber, email, password) VALUES(?,?,?,?,?)";
-                $insert_statement = $database->prepare($sql);
-                $result = $insert_statement->execute([$firstname, $lastname, $phonenumber ,$email, $password]);
-                if($result){
-                    echo 'Succesfully Saved';
-                }else{
-                    echo 'There was an error saving the data, please try again.';
-                }
-            }
-        }
+        
         ?>
     </div>
 
@@ -55,35 +30,96 @@
                     <div class="col-sm-3" style="margin-left: auto;margin-right: auto;margin-top: 5%;width: 30%;">
                         <h1 style="margin-bottom: 20px;">Registration</h1>
                         <label for="firstname"><b>First Name</b></label>
-                        <input class="form-control" style="margin-bottom:20px;" type="text" name="firstname" required>
+                        <input class="form-control" style="margin-bottom:20px;" type="text" name="firstname" id="firstname" required>
 
                         <label for="lastname"><b>Last Name</b></label>
-                        <input class="form-control" style="margin-bottom:20px;" type="text" name="lastname" required>
+                        <input class="form-control" style="margin-bottom:20px;" type="text" name="lastname" id="lastname" required>
 
                         <label for="phonenumber"><b>Phone Number</b></label>
-                        <input class="form-control" style="margin-bottom:20px;" type="text" name="phonenumber" required>
+                        <input class="form-control" style="margin-bottom:20px;" type="text" name="phonenumber" id="phonenumber" required>
 
                         <label for="email"><b>Email Address</b></label>
-                        <input class="form-control" style="margin-bottom:20px;" type="email" name="email" required>
+                        <input class="form-control" style="margin-bottom:20px;" type="email" name="email" id="email" required>
 
                         <label for="password"><b>Password</b></label>
-                        <input class="form-control" style="margin-bottom:20px;" type="password" name="password" required>
+                        <input class="form-control" style="margin-bottom:20px;" type="password" name="password" id="password" required>
 
                         <label for="confirm_password"><b>Confirm Password</b></label>
-                        <input class="form-control" style="margin-bottom:20px;" type="password" name="confirm_password" required>
+                        <input class="form-control" style="margin-bottom:20px;" type="password" name="confirm_password" id="confirm_password" required>
 
-                        <input class="btn btn-primary" style="margin-bottom:20px;width: 100%;" type="submit" name="send_info" value="Sing In">
+                        <input class="btn btn-primary" style="margin-bottom:20px;width: 100%;" type="submit" name="send_info" id="registration" value="Sing In">
+
+                        <label for="">Have an account? <a href="login.php">Login here</a></label>
                     </div>
                 </div>
             </div>
         </form>
     </div>
 
+    <!-- Imports for jquery, sweet alert for better looking alerts and a manualy created script to passthroug information to php file, validate data and send alerts. -->
+
     <script src="./js/jquery-3.5.1.min.js"></script>
+    <script src="./plugins/sweetalert2.all.min.js"></script>
     <script type="text/javascript">
-    $(function(){
-        alert('Hello')
-    });
+        $(function() {
+            $('#registration').click(function(e) {
+                var validation = this.form.checkValidity();
+
+                if (validation) {
+                    var firstname = $('#firstname').val();
+                    var lastname = $('#lastname').val();
+                    var phonenumber = $('#phonenumber').val();
+                    var email = $('#email').val();
+                    var password = $('#password').val();
+                    var confirm_password = $('#confirm_password').val();
+
+                    e.preventDefault();
+
+                    if (confirm_password != password) {
+                        Swal.fire(
+                            '¡Ups!',
+                            "Passwords does not match",
+                            'error'
+                        )
+                    } else {
+                       
+
+                        $.ajax({
+                            type: 'POST',
+                            url: 'registration_method.php',
+                            data: {
+                                firstname: firstname,
+                                lastname: lastname,
+                                phonenumber: phonenumber,
+                                email: email,
+                                password: password
+                            },
+                            success: function(data) {
+                                Swal.fire(
+                                    'Successfull',
+                                    data,
+                                    'success'
+                                )
+                                setTimeout(' window.location.href = "login.php"', 1500);
+                            },
+                            error: function(data) {
+                                Swal.fire(
+                                    'Errors',
+                                    data,
+                                    'error'
+                                )
+                            }
+                        });
+                    }
+                } else {
+                    Swal.fire(
+                        '¡Ups!',
+                        "Incomplete form",
+                        'error'
+                    )
+                }
+            })
+        })
     </script>
 
 </body>
